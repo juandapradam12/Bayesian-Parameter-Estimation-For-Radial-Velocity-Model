@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+<<<<<<< HEAD
 #include <math.h>
 
 /* COMPILO CON cc CurvaRotacion.c -o CurvaRotacion.x -lm Y ./CurvaRotacion.x */
@@ -32,10 +33,37 @@ int main(){
 void Lector_Datos(void){
 
 	FILE *datos = fopen("RadialVelocities.dat","r");
+=======
+
+#define MAG_CAR 32
+#define FILAS 301
+#define COLS 2 
+
+#define b_b 0.2497
+#define b_d 5.16
+#define a_d 0.3105
+#define a_h 64.3
+
+int main(){
+
+	/* LEE LOS DATOS */	
+	
+	// LEE DATOS 
+
+	FILE *datos; // datos es el archivo 
+	datos = fopen("RadialVelocities.dat","r"); //cond_ini_cuerda
+
+	// DEFINO ARRAY EN MEMORIA VARIABLE
+>>>>>>> e428b58ca5754ac1995f6b72822bc5bd7cfeb869
 	
 	double **M_Datos;
     	M_Datos = malloc(sizeof(double *)*FILAS*COLS);
 
+<<<<<<< HEAD
+=======
+	// SEPARA LOS DATOS EN FILAS Y DESPUES EN COLUMNAS DE ACUERDO A EL DELIMITADOR
+
+>>>>>>> e428b58ca5754ac1995f6b72822bc5bd7cfeb869
 	char linea[MAG_CAR];
 	char *split_linea;
 		
@@ -46,21 +74,49 @@ void Lector_Datos(void){
 		M_Datos[i] = malloc(sizeof(double)*MAG_CAR);
 		split_linea = strtok(linea, " ");
 		
+<<<<<<< HEAD
 		while (split_linea != NULL){
+=======
+		while (split_linea != NULL)
+        	{
+>>>>>>> e428b58ca5754ac1995f6b72822bc5bd7cfeb869
 			M_Datos[i][j] = atof(split_linea);
             		split_linea = strtok(NULL, " ");
             		j += 1;
         	}
 		i +=1;
 	}
+<<<<<<< HEAD
 	
 	FILE *Datos = fopen("Datos.dat", "w");
 	
 	for(int i = 0; i < FILAS-1; i++){
+=======
+
+	// IMPRIME LOS DATOS	
+	/*
+	for(int j = 0; j < FILAS; j++){
+        	for (int i = 0; i < COLS; i++){
+			if( j != 0 ){
+				printf("Datos[%d][%d]=%lf", j, i, M_Datos[j][i] );
+        			printf("\n");
+			}
+		}
+	}
+	*/
+
+	/* GENERA ARCHIVOS DE DATOS */ 
+
+	FILE *Datos = fopen("Datos.dat", "w");
+	
+	for(int i = 0; i < FILAS; i++)
+	{
+>>>>>>> e428b58ca5754ac1995f6b72822bc5bd7cfeb869
             	fprintf(Datos, "%lf" " " "%lf" ,  M_Datos[i][0], M_Datos[i][1]);
         	fprintf(Datos, "\n");
     	}
 	fclose(Datos);
+<<<<<<< HEAD
 
 	R = malloc(sizeof(double *)*FILAS);
 	
@@ -92,3 +148,9 @@ double Error(double v_rand){
 
 
 
+=======
+	
+	return 0; 
+
+}
+>>>>>>> e428b58ca5754ac1995f6b72822bc5bd7cfeb869
