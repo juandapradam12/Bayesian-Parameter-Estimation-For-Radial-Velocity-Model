@@ -1,14 +1,32 @@
 import numpy as np 
 import matplotlib.pyplot as plt 
 
+#### DATOS
+
 Datos = np.loadtxt('Datos.dat')
 
-radio = Datos[:,0]
-v_rot = Datos[:,1]
+R_exp = Datos[:,0]
+V_Rad_exp = Datos[:,1]
 
-plt.plot(radio, v_rot)
+#### AJUSTE 
+
+Ajuste = np.loadtxt('Ajuste.dat')
+
+#### GRAFICA
+
+plt.plot(R_exp, V_Rad_exp)
+plt.plot(R_exp, Ajuste)
 plt.xlabel("Radio")
 plt.ylabel("Velocidad de Rotacion")
 plt.savefig("Datos.png")
-#plt.show()
+plt.savefig('DatosyModelo.png')
+plt.show()
 plt.clf()
+
+
+
+
+
+
+
+
