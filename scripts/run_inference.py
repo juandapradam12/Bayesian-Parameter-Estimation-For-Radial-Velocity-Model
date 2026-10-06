@@ -18,6 +18,7 @@ from galaxy_mcmc.mcmc import run_ensemble
 from galaxy_mcmc.model import GalaxyPotential
 from galaxy_mcmc.plotting import (
     plot_corner,
+    plot_residuals,
     plot_rotation_curve_fit,
     plot_traces,
     print_diagnostics,
@@ -39,6 +40,11 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--burn-in", type=int, default=5_000, help="Burn-in steps discarded")
     p.add_argument("--n-chains", type=int, default=4, help="Independent MH chains")
     p.add_argument("--seed", type=int, default=42, help="RNG seed")
+    p.add_argument(
+        "--fit-ah",
+        action="store_true",
+        help="Also infer the halo scale length Ah [kpc]",
+    )
     p.add_argument(
         "--fit-sigma",
         action="store_true",
@@ -73,12 +79,15 @@ def main() -> int:
         potential=potential,
         sigma=args.sigma,
         fit_sigma=args.fit_sigma,
+        fit_ah=args.fit_ah,
     )
 
+    free = ", ".join(posterior.param_names)
     print(
         f"Loaded {len(radius)} points | R ∈ [{radius.min():.2f}, {radius.max():.2f}] kpc | "
         f"V ∈ [{velocity.min():.2f}, {velocity.max():.2f}] km/s"
     )
+    print(f"Free parameters: {free}")
     print(
         f"Running {args.n_chains} Metropolis–Hastings chains × {args.n_steps} steps "
         f"(burn-in {args.burn_in})..."
@@ -96,27 +105,26 @@ def main() -> int:
     print(report)
 
     args.outdir.mkdir(parents=True, exist_ok=True)
-    report_path = args.outdir / "posterior_summary.txt"
-    report_path.write_text(report + "\n")
+    (args.outdir / "posterior_summary.txt").write_text(report + "\n")
 
     import numpy as np
 
     combined = np.concatenate([r.samples for r in results], axis=0)
+    names = results[0].param_names
     summary = {
         name: {
             "p16": float(np.percentile(combined[:, i], 16)),
             "p50": float(np.percentile(combined[:, i], 50)),
             "p84": float(np.percentile(combined[:, i], 84)),
         }
-        for i, name in enumerate(results[0].param_names)
+        for i, name in enumerate(names)
     }
     summary["acceptance_rates"] = [r.acceptance_rate for r in results]
     summary["n_steps"] = args.n_steps
     summary["burn_in"] = args.burn_in
     summary["n_chains"] = args.n_chains
+    summary["param_names"] = list(names)
     (args.outdir / "posterior_summary.json").write_text(json.dumps(summary, indent=2))
-
-    # Persist chain for downstream analysis
     np.save(args.outdir / "posterior_samples.npy", combined)
 
     plot_rotation_curve_fit(
@@ -125,9 +133,18 @@ def main() -> int:
         combined,
         potential,
         args.outdir / "rotation_curve_fit.png",
+        param_names=names,
+    )
+    plot_residuals(
+        radius,
+        velocity,
+        combined,
+        potential,
+        args.outdir / "residuals.png",
+        param_names=names,
     )
     plot_traces(results, args.outdir / "mcmc_traces.png")
-    plot_corner(combined, results[0].param_names, args.outdir / "posterior_corner.png")
+    plot_corner(combined, names, args.outdir / "posterior_corner.png")
 
     print(f"\nWrote figures and summaries to {args.outdir}/")
     return 0

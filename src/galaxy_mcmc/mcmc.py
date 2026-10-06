@@ -132,15 +132,10 @@ def run_ensemble(
     """
     rng = np.random.default_rng(seed)
     if start_guess is None:
-        start_guess = np.array([np.log(1.0), np.log(1.4e4), np.log(2.6e4)])
-        if posterior.fit_sigma:
-            start_guess = np.append(start_guess, np.log(posterior.sigma))
+        start_guess = posterior.default_start()
 
     results: list[MCMCResult] = []
-    # Relative proposal scales: bulge mass is poorly constrained → larger steps
-    base_scale = np.array([0.8, 0.04, 0.04])
-    if posterior.fit_sigma:
-        base_scale = np.append(base_scale, 0.05)
+    base_scale = posterior.proposal_scale()
 
     for c in range(n_chains):
         jitter = 0.15 * base_scale * rng.normal(size=posterior.n_params)

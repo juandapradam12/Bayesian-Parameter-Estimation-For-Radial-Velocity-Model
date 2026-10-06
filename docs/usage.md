@@ -24,10 +24,20 @@ Useful flags:
 | `--n-steps N` | Steps per chain (default 25000) |
 | `--burn-in N` | Discarded warm-up steps (default 5000) |
 | `--n-chains N` | Independent MH chains (default 4) |
+| `--fit-ah` | Infer halo scale length \(A_h\) |
 | `--fit-sigma` | Infer noise \(\sigma\) jointly with masses |
 | `--sigma S` | Fixed noise in km/s if not fitting \(\sigma\) |
 | `--quick` | Short smoke run |
 | `--seed N` | Reproducibility |
+
+### Mock recovery
+
+```bash
+make mock
+# or: python3 scripts/mock_recovery.py
+```
+
+Synthesizes a rotation curve from known \((M_b,M_d,M_h,A_h)\) and checks that the truth lies in the 16–84% posterior interval.
 
 ### Interpreting outputs
 

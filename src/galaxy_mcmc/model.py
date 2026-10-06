@@ -55,28 +55,44 @@ class GalaxyPotential:
     Ah: float = SCALE_PARAMS["Ah"]
 
     def component_velocities_squared(
-        self, radius: np.ndarray, Mb: float, Md: float, Mh: float
+        self,
+        radius: np.ndarray,
+        Mb: float,
+        Md: float,
+        Mh: float,
+        Ah: float | None = None,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Return ``(vb², vd², vh²)`` at each radius."""
         r = np.asarray(radius, dtype=float)
         r2 = r * r
+        ah = self.Ah if Ah is None else float(Ah)
         vb2 = Mb * r2 / np.power(r2 + self.Bb**2, 1.5)
         vd2 = Md * r2 / np.power(r2 + (self.Bd + self.Ad) ** 2, 1.5)
-        vh2 = Mh / np.sqrt(r2 + self.Ah**2)
+        vh2 = Mh / np.sqrt(r2 + ah**2)
         return vb2, vd2, vh2
 
     def circular_velocity(
-        self, radius: np.ndarray, Mb: float, Md: float, Mh: float
+        self,
+        radius: np.ndarray,
+        Mb: float,
+        Md: float,
+        Mh: float,
+        Ah: float | None = None,
     ) -> np.ndarray:
         """Circular speed ``vc(R)`` in km/s for scaled masses Mb, Md, Mh."""
-        vb2, vd2, vh2 = self.component_velocities_squared(radius, Mb, Md, Mh)
+        vb2, vd2, vh2 = self.component_velocities_squared(radius, Mb, Md, Mh, Ah=Ah)
         return np.sqrt(np.maximum(vb2 + vd2 + vh2, 0.0))
 
     def components(
-        self, radius: np.ndarray, Mb: float, Md: float, Mh: float
+        self,
+        radius: np.ndarray,
+        Mb: float,
+        Md: float,
+        Mh: float,
+        Ah: float | None = None,
     ) -> dict[str, np.ndarray]:
         """Named circular-speed contributions (not summed in quadrature)."""
-        vb2, vd2, vh2 = self.component_velocities_squared(radius, Mb, Md, Mh)
+        vb2, vd2, vh2 = self.component_velocities_squared(radius, Mb, Md, Mh, Ah=Ah)
         return {
             "bulge": np.sqrt(np.maximum(vb2, 0.0)),
             "disk": np.sqrt(np.maximum(vd2, 0.0)),
@@ -84,7 +100,12 @@ class GalaxyPotential:
             "total": np.sqrt(np.maximum(vb2 + vd2 + vh2, 0.0)),
         }
 
-    def from_theta(self, radius: np.ndarray, theta: np.ndarray) -> np.ndarray:
+    def from_theta(
+        self,
+        radius: np.ndarray,
+        theta: np.ndarray,
+        Ah: float | None = None,
+    ) -> np.ndarray:
         """Evaluate ``vc`` from a parameter vector ``[Mb, Md, Mh]``."""
         Mb, Md, Mh = theta
-        return self.circular_velocity(radius, Mb, Md, Mh)
+        return self.circular_velocity(radius, Mb, Md, Mh, Ah=Ah)

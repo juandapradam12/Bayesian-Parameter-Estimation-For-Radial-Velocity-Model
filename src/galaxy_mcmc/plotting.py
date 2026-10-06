@@ -11,12 +11,27 @@ from .mcmc import MCMCResult, gelman_rubin
 from .model import GalaxyPotential
 
 
+def _decode_sample(
+    sample: np.ndarray,
+    param_names: tuple[str, ...],
+    potential: GalaxyPotential,
+) -> tuple[np.ndarray, float]:
+    """Return ``(masses, Ah)`` from a physical-space sample row."""
+    masses = sample[:3]
+    if "Ah" in param_names:
+        ah = float(sample[param_names.index("Ah")])
+    else:
+        ah = float(potential.Ah)
+    return masses, ah
+
+
 def plot_rotation_curve_fit(
     radius: np.ndarray,
     velocity: np.ndarray,
     samples: np.ndarray,
     potential: GalaxyPotential,
     outfile: str | Path,
+    param_names: tuple[str, ...] = ("Mb", "Md", "Mh"),
     n_posterior_draws: int = 200,
     seed: int = 0,
 ) -> Path:
@@ -27,12 +42,14 @@ def plot_rotation_curve_fit(
     rng = np.random.default_rng(seed)
     r_grid = np.linspace(radius.min(), radius.max(), 400)
     idx = rng.choice(len(samples), size=min(n_posterior_draws, len(samples)), replace=False)
-    curves = np.array(
-        [potential.from_theta(r_grid, samples[i, :3]) for i in idx]
-    )
+    curves = []
+    for i in idx:
+        masses, ah = _decode_sample(samples[i], param_names, potential)
+        curves.append(potential.from_theta(r_grid, masses, Ah=ah))
+    curves = np.asarray(curves)
     lo, med, hi = np.percentile(curves, [16, 50, 84], axis=0)
-    med_params = np.median(samples[:, :3], axis=0)
-    comps = potential.components(r_grid, *med_params)
+    med_masses, med_ah = _decode_sample(np.median(samples, axis=0), param_names, potential)
+    comps = potential.components(r_grid, *med_masses, Ah=med_ah)
 
     fig, ax = plt.subplots(figsize=(8.5, 5.2))
     ax.fill_between(r_grid, lo, hi, color="#4C78A8", alpha=0.25, label="68% posterior band")
@@ -47,6 +64,35 @@ def plot_rotation_curve_fit(
     ax.legend(frameon=False, loc="upper right")
     ax.set_xlim(0, radius.max())
     ax.set_ylim(0, max(velocity.max(), hi.max()) * 1.08)
+    fig.tight_layout()
+    fig.savefig(outfile, dpi=160)
+    plt.close(fig)
+    return outfile
+
+
+def plot_residuals(
+    radius: np.ndarray,
+    velocity: np.ndarray,
+    samples: np.ndarray,
+    potential: GalaxyPotential,
+    outfile: str | Path,
+    param_names: tuple[str, ...] = ("Mb", "Md", "Mh"),
+) -> Path:
+    """Residuals (data − median model) versus radius."""
+    outfile = Path(outfile)
+    outfile.parent.mkdir(parents=True, exist_ok=True)
+
+    med_masses, med_ah = _decode_sample(np.median(samples, axis=0), param_names, potential)
+    model = potential.from_theta(radius, med_masses, Ah=med_ah)
+    resid = velocity - model
+
+    fig, ax = plt.subplots(figsize=(8.5, 3.8))
+    ax.axhline(0.0, color="k", lw=0.8)
+    ax.scatter(radius, resid, s=14, c="#333333", alpha=0.75)
+    ax.set_xlabel("Galactocentric radius $R$ [kpc]")
+    ax.set_ylabel(r"Residual $V_{\mathrm{data}} - V_{\mathrm{model}}$ [km/s]")
+    ax.set_title("Fit residuals")
+    ax.set_xlim(0, radius.max())
     fig.tight_layout()
     fig.savefig(outfile, dpi=160)
     plt.close(fig)
@@ -128,11 +174,8 @@ def print_diagnostics(results: list[MCMCResult]) -> str:
     lines = []
     for i, res in enumerate(results):
         lines.append(f"Chain {i}: acceptance = {res.acceptance_rate:.3f}")
-    # Combined burned-in samples
     burned = [res.samples for res in results]
     combined = np.concatenate(burned, axis=0)
-    summary = results[0].summary()
-    # rebuild summary from combined
     names = results[0].param_names
     lines.append("")
     lines.append("Posterior summary (combined chains):")

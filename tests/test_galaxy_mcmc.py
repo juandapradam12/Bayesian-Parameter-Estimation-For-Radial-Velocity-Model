@@ -31,7 +31,6 @@ def test_circular_velocity_positive_and_finite():
     v = pot.circular_velocity(r, Mb=100.0, Md=1.0e4, Mh=2.0e4)
     assert np.all(np.isfinite(v))
     assert np.all(v >= 0)
-    # Halo should dominate at large R for these masses
     comps = pot.components(r, 100.0, 1.0e4, 2.0e4)
     assert comps["halo"][-1] > comps["bulge"][-1]
 
@@ -44,12 +43,30 @@ def test_velocity_increases_with_mass():
     assert v2 > v1
 
 
+def test_ah_changes_halo_contribution():
+    pot = GalaxyPotential()
+    r = np.array([50.0])
+    v_small = pot.circular_velocity(r, 1.0, 1.0e4, 2.0e4, Ah=20.0)[0]
+    v_large = pot.circular_velocity(r, 1.0, 1.0e4, 2.0e4, Ah=100.0)[0]
+    assert v_small != v_large
+
+
 def test_log_posterior_finite_at_reasonable_point():
     r, v = load_rotation_curve()
     post = RotationCurvePosterior(r, v, GalaxyPotential(), sigma=2.2)
     theta = np.log([1.0, 1.4e4, 2.6e4])
     lp = post.log_posterior(theta)
     assert np.isfinite(lp)
+
+
+def test_fit_ah_parameter_count_and_names():
+    r, v = load_rotation_curve()
+    post = RotationCurvePosterior(r, v, GalaxyPotential(), fit_ah=True, fit_sigma=True)
+    assert post.n_params == 5
+    assert post.param_names == ("Mb", "Md", "Mh", "Ah", "sigma")
+    theta = post.default_start()
+    assert theta.shape == (5,)
+    assert np.isfinite(post.log_posterior(theta))
 
 
 def test_log_prior_rejects_out_of_bounds():
@@ -86,9 +103,32 @@ def test_ensemble_recovers_disk_and_halo():
     combined = np.concatenate([res.samples for res in results], axis=0)
     md = np.median(combined[:, 1])
     mh = np.median(combined[:, 2])
-    # Rough recovery against the least-squares solution ~1.45e4, 2.62e4
     assert 8e3 < md < 2.5e4
     assert 1.5e4 < mh < 4e4
+
+
+def test_mock_recovery_disk_halo_ah():
+    """Synthetic curve with known truth; Md, Mh, Ah should be recovered."""
+    rng = np.random.default_rng(11)
+    true = {"Mb": 50.0, "Md": 1.4e4, "Mh": 2.6e4, "Ah": 64.3}
+    sigma = 1.5
+    radius = np.linspace(1.0, 250.0, 80)
+    pot = GalaxyPotential(Ah=true["Ah"])
+    velocity = pot.circular_velocity(
+        radius, true["Mb"], true["Md"], true["Mh"]
+    ) + sigma * rng.normal(size=radius.size)
+
+    post = RotationCurvePosterior(
+        radius, velocity, GalaxyPotential(), sigma=sigma, fit_ah=True
+    )
+    results = run_ensemble(post, n_chains=2, n_steps=8000, burn_in=2000, seed=11)
+    samples = np.concatenate([r.samples for r in results], axis=0)
+    names = results[0].param_names
+
+    for name in ("Md", "Mh", "Ah"):
+        i = names.index(name)
+        p16, p84 = np.percentile(samples[:, i], [16, 84])
+        assert p16 <= true[name] <= p84, f"{name} truth not in 68% interval"
 
 
 def test_gelman_rubin_near_one_for_identical_chains():

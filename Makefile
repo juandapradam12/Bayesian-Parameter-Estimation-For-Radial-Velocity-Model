@@ -1,4 +1,4 @@
-.PHONY: install test run quick clean legacy-build
+.PHONY: install test run quick mock clean legacy-build
 
 PYTHON ?= python3
 
@@ -10,10 +10,13 @@ test:
 	$(PYTHON) -m pytest -q
 
 quick:
-	$(PYTHON) scripts/run_inference.py --quick
+	$(PYTHON) scripts/run_inference.py --quick --fit-ah
 
 run:
-	$(PYTHON) scripts/run_inference.py --fit-sigma
+	$(PYTHON) scripts/run_inference.py --fit-ah --fit-sigma
+
+mock:
+	$(PYTHON) scripts/mock_recovery.py
 
 # Historical C reference (fixed build of the original homework code)
 legacy-build:

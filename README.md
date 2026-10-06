@@ -54,7 +54,7 @@ Geometric scales are fixed (kpc):
 | \(A_d\) | 0.3105 | Disk scale height |
 | \(A_h\) | 64.3 | Halo |
 
-Free parameters \(M_b, M_d, M_h\) are **scaled masses** with \(G\) absorbed (units of \((\mathrm{km\,s^{-1}})^2\,\mathrm{kpc}\)). Optionally the Gaussian noise \(\sigma\) is inferred as well.
+Free parameters \(M_b, M_d, M_h\) are **scaled masses** with \(G\) absorbed (units of \((\mathrm{km\,s^{-1}})^2\,\mathrm{kpc}\)). Optionally the halo scale \(A_h\) and/or the Gaussian noise \(\sigma\) can be inferred as well (`--fit-ah`, `--fit-sigma`).
 
 Likelihood (independent Gaussian errors):
 
@@ -79,7 +79,10 @@ make quick
 
 # Full inference (recommended)
 make run
-# or: python3 scripts/run_inference.py --fit-sigma
+# or: python3 scripts/run_inference.py --fit-ah --fit-sigma
+
+# Mock-data recovery check
+make mock
 
 # Unit tests
 make test
@@ -88,6 +91,7 @@ make test
 Outputs land in `results/`:
 
 - `rotation_curve_fit.png` — data, median model, 68% band, component curves
+- `residuals.png` — data − model versus radius
 - `mcmc_traces.png` — chain traces
 - `posterior_corner.png` — pairwise posteriors
 - `posterior_summary.txt` / `.json` — medians, credible intervals, \(\hat{R}\)
