@@ -133,13 +133,13 @@ Run: `--fit-ah --fit-sigma` (4 chains × 20k steps).
   <img src="docs/assets/posterior_corner.png" alt="Posterior corner plot for Mb, Md, Mh, Ah, sigma" width="560"/>
 </p>
 
-<p align="center"><em>Corner plot of the joint posterior (masses, halo scale $A_h$, and noise $\sigma$).</em></p>
+*Corner plot of the joint posterior (masses, halo scale* $A_h$*, and noise* $\sigma$*).*
 
 <p align="center">
   <img src="docs/assets/mcmc_traces.png" alt="MCMC trace plots for all chains and parameters" width="780"/>
 </p>
 
-<p align="center"><em>Multi-chain traces (log scale). Vertical dotted line marks burn-in.</em></p>
+*Multi-chain traces (log scale). Vertical dotted line marks burn-in.*
 
 ---
 
@@ -215,7 +215,3 @@ print(chains[0].summary())
 Developed as a Monte Carlo / Bayesian parameter-estimation assignment on galactic rotation curves by **Juan Prada**, then rebuilt as a reusable inference package with corrected models, diagnostics, and documentation.
 
 If you reuse this in coursework or a portfolio, please keep attribution and link back to the repository.
-
-## License
-
-MIT — see [`LICENSE`](LICENSE).
