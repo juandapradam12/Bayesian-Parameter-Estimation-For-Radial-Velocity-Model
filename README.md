@@ -6,15 +6,23 @@
 
 Flat outer rotation curves are one of the classic empirical signatures of dark matter. This repository takes that idea seriously: given measured circular velocities \(v_c(R)\), it runs Metropolis–Hastings Monte Carlo on a three-component galactic mass model and returns a full posterior, not a single best-fit point.
 
-<p align="center">
-  <img src="docs/assets/rotation_curve_fit.png" alt="Bayesian rotation-curve fit with bulge, disk, and halo components" width="760"/>
-</p>
+### Rotation-curve fit
 
 <p align="center">
-  <img src="docs/assets/residuals.png" alt="Fit residuals" width="360"/>
-  &nbsp;
-  <img src="docs/assets/enclosed_mass.png" alt="Enclosed mass profile" width="360"/>
+  <img src="docs/assets/rotation_curve_fit.png" alt="Bayesian rotation-curve fit with bulge, disk, and halo components" width="780"/>
 </p>
+
+<p align="center"><em>Data, median model, 68% posterior band, and bulge / disk / halo contributions.</em></p>
+
+### Residuals and enclosed mass
+
+<p align="center">
+  <img src="docs/assets/residuals.png" alt="Fit residuals versus radius" width="380"/>
+  &nbsp;
+  <img src="docs/assets/enclosed_mass.png" alt="Scaled enclosed mass profile" width="380"/>
+</p>
+
+<p align="center"><em>Left: data − model residuals. Right: scaled enclosed mass \(M(&lt;R)=v_c^2 R\) with 68% band.</em></p>
 
 ---
 
@@ -119,9 +127,19 @@ Run: `--fit-ah --fit-sigma` (4 chains × 20k steps).
 
 **Takeaway:** the disk shapes the inner curve; the halo sustains the outer velocities; this dataset does not require a significant bulge. \(\hat{R}\approx 1\) for well-constrained parameters.
 
+### Posterior and MCMC diagnostics
+
 <p align="center">
-  <img src="docs/assets/posterior_corner.png" alt="Posterior corner plot" width="520"/>
+  <img src="docs/assets/posterior_corner.png" alt="Posterior corner plot for Mb, Md, Mh, Ah, sigma" width="560"/>
 </p>
+
+<p align="center"><em>Corner plot of the joint posterior (masses, halo scale \(A_h\), and noise \(\sigma\)).</em></p>
+
+<p align="center">
+  <img src="docs/assets/mcmc_traces.png" alt="MCMC trace plots for all chains and parameters" width="780"/>
+</p>
+
+<p align="center"><em>Multi-chain traces (log scale). Vertical dotted line marks burn-in.</em></p>
 
 ---
 
