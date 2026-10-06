@@ -1,0 +1,32 @@
+\documentclass[11pt]{article}
+\usepackage[margin=2cm]{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+\title{Galaxy Rotation Curves\\[0.3em]
+\large Bayesian Mass Estimation with Metropolis--Hastings}
+\author{Juan Prada\\[0.2em]
+\small Legacy homework write-up (see repository README for the enhanced pipeline)}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section*{Overview}
+Observed galactic rotation curves are modelled as the circular velocity arising from a
+Plummer bulge, a Miyamoto--Nagai disk, and an extended halo. Scaled masses
+\(M_b\), \(M_d\) and \(M_h\) are inferred with Metropolis--Hastings MCMC.
+
+The figure below is produced by the corrected legacy C pipeline in this directory.
+For diagnostics, multi-chain \(\hat{R}\), and the modern Python package, see the
+repository root README and \texttt{docs/}.
+
+\section*{Data and model fit}
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.95\linewidth]{DatosyModelo.png}
+\caption{Observed rotation curve and mean posterior model from the legacy C
+Metropolis--Hastings sampler.}
+\end{figure}
+
+\end{document}
