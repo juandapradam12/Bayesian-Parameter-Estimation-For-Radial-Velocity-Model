@@ -24,3 +24,4 @@ legacy/DatosyModelo.png
 .DS_Store
 .vscode/
 .idea/
+docs/assets/*.bak
