@@ -49,10 +49,10 @@ Keeping disk/bulge scales fixed yields a well-posed problem that still answers t
 
 ### Enclosed mass
 
-From $v_c^2 = G M(<R)/R$ with $G$ absorbed,
+From $v_c^2 = G M(< R)/R$ with $G$ absorbed,
 
 $$
-M(<R) = v_c^2(R)\, R
+M(< R) = v_c^2(R)\, R
 $$
 
 in the same scaled mass units. The pipeline plots a posterior band for this profile.

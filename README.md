@@ -22,7 +22,7 @@ A galaxy's spin encodes how its mass is arranged. Given measured circular veloci
   <img src="docs/assets/enclosed_mass.png" alt="Scaled enclosed mass profile" width="380"/>
 </p>
 
-*Left: data − model residuals. Right: scaled enclosed mass* $M(<R)=v_c^{2}R$ *with 68% band.*
+Left: data − model residuals. Right: scaled enclosed mass $M(< R)=v_c^{2} R$ with 68% band.
 
 ---
 
@@ -45,7 +45,7 @@ Originally a computational-methods homework. Rebuilt into a small, installable i
 - **Adaptive Metropolis–Hastings** in log-parameter space
 - **Optional free halo scale** $A_h$ and noise $\sigma$
 - **Multi-chain diagnostics** (acceptance rate + Gelman–Rubin $\hat{R}$)
-- **Figures out of the box**: fit, residuals, enclosed mass $M(<R)$, traces, corner
+- **Figures out of the box**: fit, residuals, enclosed mass $M(< R)$, traces, corner
 - **Reproducible outputs**: JSON summary with seed + copy-paste command; samples as `.npy` and `.csv`
 - **Mock recovery check** proving the sampler recovers known masses
 - **Legacy C pipeline** kept for teaching / comparison
@@ -101,7 +101,7 @@ Outputs go to `results/`:
 | --- | --- |
 | `rotation_curve_fit.png` | Data, median model, 68% band, component curves |
 | `residuals.png` | Data − model vs radius |
-| `enclosed_mass.png` | Scaled $M(<R)=v_c^2 R$ with posterior band |
+| `enclosed_mass.png` | Scaled $M(< R)=v_c^2 R$ with posterior band |
 | `mcmc_traces.png` | Chain traces |
 | `posterior_corner.png` | Pairwise posteriors |
 | `posterior_summary.txt` / `.json` | Medians, intervals, $\hat{R}$, seed, reproducibility command |
@@ -113,7 +113,7 @@ Full CLI and API notes: [docs/usage.md](docs/usage.md).
 
 ## Example results
 
-Dataset: `data/RadialVelocities.dat` (300 points, $R \sim 0.3$–$300\,\mathrm{kpc}$).
+Dataset: `data/RadialVelocities.dat` (300 points, $0.3 \lesssim R \lesssim 300\,\mathrm{kpc}$).
 
 Run: `--fit-ah --fit-sigma` (4 chains × 20k steps).
 
@@ -133,13 +133,13 @@ Run: `--fit-ah --fit-sigma` (4 chains × 20k steps).
   <img src="docs/assets/posterior_corner.png" alt="Posterior corner plot for Mb, Md, Mh, Ah, sigma" width="560"/>
 </p>
 
-*Corner plot of the joint posterior (masses, halo scale* $A_h$*, and noise* $\sigma$*).*
+Corner plot of the joint posterior (masses, halo scale $A_h$, and noise $\sigma$).
 
 <p align="center">
   <img src="docs/assets/mcmc_traces.png" alt="MCMC trace plots for all chains and parameters" width="780"/>
 </p>
 
-*Multi-chain traces (log scale). Vertical dotted line marks burn-in.*
+Multi-chain traces (log scale). Vertical dotted line marks burn-in.
 
 ---
 

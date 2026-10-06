@@ -56,7 +56,7 @@ All figures and tables land in `results/` (or `--outdir`).
    - JSON includes `seed` and a copy-paste `reproducibility` command.
 2. **`rotation_curve_fit.png`** — science figure: data, median model, 68% band, bulge/disk/halo.
 3. **`residuals.png`** — data − model; look for trends with $R$.
-4. **`enclosed_mass.png`** — scaled $M(<R)=v_c^2 R$ with posterior band.
+4. **`enclosed_mass.png`** — scaled $M(< R)=v_c^2 R$ with posterior band.
 5. **`mcmc_traces.png`** — mixing and burn-in.
 6. **`posterior_corner.png`** — pairwise degeneracies.
 7. **`posterior_samples.npy` / `.csv`** — burned-in draws for downstream analysis.
@@ -144,7 +144,7 @@ If the galaxy has a very different size, retune fixed scales in `GalaxyPotential
 make test
 ```
 
-Coverage includes data loading, model sanity, prior bounds, short MH runs, approximate recovery of $M_d$/$M_h$, mock recovery with free $A_h$, enclosed-mass consistency, and Gelman–Rubin on synthetic chains.
+Coverage includes data loading, model sanity, prior bounds, short MH runs, approximate recovery of $M_d$ / $M_h$, mock recovery with free $A_h$, enclosed-mass consistency, and Gelman–Rubin on synthetic chains.
 
 GitHub Actions (`.github/workflows/tests.yml`) runs the same suite on every push and pull request.
 
