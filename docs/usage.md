@@ -34,9 +34,9 @@ python3 scripts/run_inference.py --help
 | `--n-steps N` | Steps per chain (default 25000) |
 | `--burn-in N` | Discarded warm-up (default 5000) |
 | `--n-chains N` | Independent MH chains (default 4) |
-| `--fit-ah` | Infer halo scale \(A_h\) |
-| `--fit-sigma` | Infer noise \(\sigma\) |
-| `--sigma S` | Fixed noise [km/s] if not fitting \(\sigma\) |
+| `--fit-ah` | Infer halo scale $A_h$ |
+| `--fit-sigma` | Infer noise $\sigma$ |
+| `--sigma S` | Fixed noise [km/s] if not fitting $\sigma$ |
 | `--quick` | Short smoke run (2k steps, 2 chains) |
 | `--seed N` | RNG seed (written into the JSON summary) |
 
@@ -52,11 +52,11 @@ All figures and tables land in `results/` (or `--outdir`).
 
 1. **`posterior_summary.txt` / `.json`**
    - Acceptance rates ~0.15–0.4 are healthy for this proposal.
-   - \(\hat{R}\) ≲ 1.05 means chains agree.
+   - $\hat{R}$ ≲ 1.05 means chains agree.
    - JSON includes `seed` and a copy-paste `reproducibility` command.
 2. **`rotation_curve_fit.png`** — science figure: data, median model, 68% band, bulge/disk/halo.
-3. **`residuals.png`** — data − model; look for trends with \(R\).
-4. **`enclosed_mass.png`** — scaled \(M(<R)=v_c^2 R\) with posterior band.
+3. **`residuals.png`** — data − model; look for trends with $R$.
+4. **`enclosed_mass.png`** — scaled $M(< R)=v_c^2 R$ with posterior band.
 5. **`mcmc_traces.png`** — mixing and burn-in.
 6. **`posterior_corner.png`** — pairwise degeneracies.
 7. **`posterior_samples.npy` / `.csv`** — burned-in draws for downstream analysis.
@@ -81,7 +81,7 @@ make mock
 # or: python3 scripts/mock_recovery.py
 ```
 
-Builds a synthetic rotation curve from known \((M_b, M_d, M_h, A_h)\), runs MCMC, and checks that each true value falls inside the 16–84% posterior interval. This is the simplest proof that the sampler works.
+Builds a synthetic rotation curve from known $(M_b, M_d, M_h, A_h)$, runs MCMC, and checks that each true value falls inside the 16–84% posterior interval. This is the simplest proof that the sampler works.
 
 ## Library API
 
@@ -136,7 +136,7 @@ python3 scripts/run_inference.py \
   --fit-ah --fit-sigma
 ```
 
-If the galaxy has a very different size, retune fixed scales in `GalaxyPotential(...)` (or free \(A_h\)). Only `model.py` needs to change to swap analytic components.
+If the galaxy has a very different size, retune fixed scales in `GalaxyPotential(...)` (or free $A_h$). Only `model.py` needs to change to swap analytic components.
 
 ## Tests & CI
 
@@ -144,7 +144,7 @@ If the galaxy has a very different size, retune fixed scales in `GalaxyPotential
 make test
 ```
 
-Coverage includes data loading, model sanity, prior bounds, short MH runs, approximate recovery of \(M_d\)/\(M_h\), mock recovery with free \(A_h\), enclosed-mass consistency, and Gelman–Rubin on synthetic chains.
+Coverage includes data loading, model sanity, prior bounds, short MH runs, approximate recovery of $M_d$ / $M_h$, mock recovery with free $A_h$, enclosed-mass consistency, and Gelman–Rubin on synthetic chains.
 
 GitHub Actions (`.github/workflows/tests.yml`) runs the same suite on every push and pull request.
 
@@ -154,6 +154,6 @@ GitHub Actions (`.github/workflows/tests.yml`) runs the same suite on every push
 | --- | --- |
 | Acceptance ≪ 0.1 | Longer adaptation / smaller steps; try `--quick` first to sanity-check |
 | Acceptance ≫ 0.5 | Proposals too timid; increase steps or check starting point |
-| \(\hat{R} \gg 1\) | More steps / burn-in; bulge \(M_b\) is often poorly constrained — that is expected |
-| Poor fit at large \(R\) | Enable `--fit-ah` |
+| $\hat{R} \gg 1$ | More steps / burn-in; bulge $M_b$ is often poorly constrained — that is expected |
+| Poor fit at large $R$ | Enable `--fit-ah` |
 | Crashes on missing deps | `pip install -r requirements.txt && pip install -e .` |
