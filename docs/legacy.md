@@ -32,4 +32,4 @@ pdflatex Resultados_hw5.tex
 - Comparing a minimal implementation to the Python package
 - Portfolio / historical context for the original assignment
 
-For analysis, diagnostics, free \(A_h\), mock recovery, and reusable inference, use the Python package in `src/galaxy_mcmc` and the root [README](../README.md).
+For analysis, diagnostics, free $A_h$, mock recovery, and reusable inference, use the Python package in `src/galaxy_mcmc` and the root [README](../README.md).
