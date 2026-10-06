@@ -1,0 +1,28 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+.pytest_cache/
+
+# Results & local artifacts (keep directory via .gitkeep)
+results/*.png
+results/*.json
+results/*.txt
+results/*.npy
+results/*.csv
+
+# Legacy build products
+legacy/*.x
+legacy/*.dat
+legacy/*.log
+legacy/*.aux
+legacy/DatosyModelo.png
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
+docs/assets/*.bak
