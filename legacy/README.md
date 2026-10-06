@@ -1,9 +1,7 @@
-The original LaTeX homework write-up is retained for provenance.
-For the enhanced project documentation see ``docs/`` and the root README.
+# Legacy homework artifacts
 
-To regenerate a minimal figure-based report after running the legacy C code:
+Corrected C Metropolis–Hastings pipeline from the original assignment.
 
-\begin{verbatim}
-cd legacy && make -f Tarea5.mk
-pdflatex Resultados_hw5.tex
-\end{verbatim}
+- **Docs:** see [`docs/legacy.md`](../docs/legacy.md) and the root README.
+- **Run:** `make -f Tarea5.mk`
+- **Modern toolkit:** `src/galaxy_mcmc` (recommended for analysis).

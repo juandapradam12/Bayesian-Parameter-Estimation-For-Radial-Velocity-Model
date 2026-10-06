@@ -1,37 +1,51 @@
-# Galaxy MCMC — Bayesian Mass Decomposition from Rotation Curves
+# Galaxy MCMC
 
-**Infer the bulge, stellar disk, and dark-matter halo masses of a galaxy from its observed rotation curve using Metropolis–Hastings Monte Carlo.**
+### Bayesian mass decomposition from galaxy rotation curves
 
-Galaxy rotation curves do not fall as Keplerian point masses would predict: they stay high at large radii. That kinematic signature is one of the classic empirical pillars of dark matter. This project turns that idea into a concrete Bayesian inference pipeline: given measured circular velocities \(v_c(R)\), it samples the posterior of a three-component galactic mass model and returns uncertainties, diagnostics, and publication-ready figures.
+**Turn a rotation curve into posterior constraints on bulge, disk, and dark-matter halo mass — with uncertainties, diagnostics, and publication-ready figures.**
+
+Flat outer rotation curves are one of the classic empirical signatures of dark matter. This repository takes that idea seriously: given measured circular velocities \(v_c(R)\), it runs Metropolis–Hastings Monte Carlo on a three-component galactic mass model and returns a full posterior, not a single best-fit point.
 
 <p align="center">
-  <img src="docs/assets/rotation_curve_fit.png" alt="Rotation curve fit with bulge, disk, and halo components" width="720"/>
+  <img src="docs/assets/rotation_curve_fit.png" alt="Bayesian rotation-curve fit with bulge, disk, and halo components" width="760"/>
 </p>
 
 <p align="center">
-  <img src="docs/assets/posterior_corner.png" alt="Posterior corner plot for mass parameters" width="480"/>
+  <img src="docs/assets/residuals.png" alt="Fit residuals" width="360"/>
   &nbsp;
-  <img src="docs/assets/mcmc_traces.png" alt="MCMC trace diagnostics" width="480"/>
+  <img src="docs/assets/enclosed_mass.png" alt="Enclosed mass profile" width="360"/>
 </p>
 
 ---
 
-## Why this project
+## Why it matters
 
-| Problem | What this repo delivers |
+| Challenge | What this repo gives you |
 | --- | --- |
-| Rotation curves encode mass, but components are degenerate | Full posterior over bulge / disk / halo masses, not a single point estimate |
-| Classical \(\chi^2\) fits hide uncertainty | Metropolis–Hastings MCMC with burn-in, adaptation, and Gelman–Rubin \(\hat{R}\) |
-| Homework-grade C prototypes are hard to trust | Corrected physics + modern Python package + regression tests |
-| Results need to be communicable | Trace plots, corner plots, and a posterior predictive band on \(v_c(R)\) |
+| Mass components are degenerate | Joint posterior over \(M_b\), \(M_d\), \(M_h\) (and optionally \(A_h\), \(\sigma\)) |
+| A \(\chi^2\) minimum hides uncertainty | Credible intervals, predictive bands, and Gelman–Rubin \(\hat{R}\) |
+| Homework MCMC code is often wrong | Corrected physics, adaptive MH, mock recovery, CI tests |
+| Results need to communicate | Fit, residuals, enclosed mass, traces, and corner plots |
 
-This repository started as a computational-methods homework (legacy C + matplotlib). It has been rebuilt into a small research-style toolkit you can install, test, and extend.
+Originally a computational-methods homework. Rebuilt into a small, installable inference toolkit you can run, test, and show in a portfolio.
+
+---
+
+## Features
+
+- **Physics-correct** bulge + disk + halo rotation curve (\(v_c^2 = v_b^2 + v_d^2 + v_h^2\))
+- **Adaptive Metropolis–Hastings** in log-parameter space
+- **Optional free halo scale** \(A_h\) and noise \(\sigma\)
+- **Multi-chain diagnostics** (acceptance rate + Gelman–Rubin \(\hat{R}\))
+- **Figures out of the box**: fit, residuals, enclosed mass \(M(<R)\), traces, corner
+- **Reproducible outputs**: JSON summary with seed + copy-paste command; samples as `.npy` and `.csv`
+- **Mock recovery check** proving the sampler recovers known masses
+- **Legacy C pipeline** kept for teaching / comparison
+- **GitHub Actions CI** running the test suite on every push
 
 ---
 
 ## Physical model
-
-Circular velocity is the quadrature sum of three analytic contributions (Plummer bulge, Miyamoto–Nagai disk, Allen–Santillán-like halo):
 
 \[
 v_c(R)=\sqrt{v_b^2(R)+v_d^2(R)+v_h^2(R)}
@@ -45,106 +59,103 @@ v_h^2 &= M_h\big/\big(R^2+A_h^2\big)^{1/2}.
 \end{aligned}
 \]
 
-Geometric scales are fixed (kpc):
-
-| Symbol | Value | Component |
+| Symbol | Default [kpc] | Role |
 | --- | ---: | --- |
-| \(B_b\) | 0.2497 | Bulge |
-| \(B_d\) | 5.16 | Disk scale length |
-| \(A_d\) | 0.3105 | Disk scale height |
-| \(A_h\) | 64.3 | Halo |
+| \(B_b\) | 0.2497 | Bulge scale (fixed) |
+| \(B_d\) | 5.16 | Disk scale length (fixed) |
+| \(A_d\) | 0.3105 | Disk scale height (fixed) |
+| \(A_h\) | 64.3 | Halo scale (**optional free** via `--fit-ah`) |
 
-Free parameters \(M_b, M_d, M_h\) are **scaled masses** with \(G\) absorbed (units of \((\mathrm{km\,s^{-1}})^2\,\mathrm{kpc}\)). Optionally the halo scale \(A_h\) and/or the Gaussian noise \(\sigma\) can be inferred as well (`--fit-ah`, `--fit-sigma`).
+\(M_b, M_d, M_h\) are scaled masses with \(G\) absorbed (units \((\mathrm{km\,s^{-1}})^2\,\mathrm{kpc}\)).
 
-Likelihood (independent Gaussian errors):
+**Likelihood:** independent Gaussian errors with scale \(\sigma\) (fixed or free).  
+**Priors:** uniform on \(\log M\) (and on \(\log A_h\), \(\log\sigma\) when fitted).
 
-\[
-\log\mathcal{L}(\theta)=-\tfrac12\sum_i\left(\frac{V_i-v_c(R_i;\theta)}{\sigma}\right)^2 - N\log\sigma + \mathrm{const}.
-\]
-
-Priors are uniform on \(\log M\) over a wide box (and on \(\log\sigma\) when fitted).
+Details: [docs/theory.md](docs/theory.md).
 
 ---
 
 ## Quick start
 
 ```bash
-# Install
 python3 -m pip install -r requirements.txt
 python3 -m pip install -e .
 
-# Smoke test (~seconds)
-make quick
-# or: python3 scripts/run_inference.py --quick
-
-# Full inference (recommended)
-make run
-# or: python3 scripts/run_inference.py --fit-ah --fit-sigma
-
-# Mock-data recovery check
-make mock
-
-# Unit tests
-make test
+make test    # unit + mock-recovery tests
+make mock    # synthetic truth recovery (standalone)
+make quick   # short smoke run
+make run     # full inference: --fit-ah --fit-sigma
 ```
 
-Outputs land in `results/`:
+Outputs go to `results/`:
 
-- `rotation_curve_fit.png` — data, median model, 68% band, component curves
-- `residuals.png` — data − model versus radius
-- `enclosed_mass.png` — posterior band for scaled \(M(<R)=v_c^2 R\)
-- `mcmc_traces.png` — chain traces
-- `posterior_corner.png` — pairwise posteriors
-- `posterior_summary.txt` / `.json` — medians, credible intervals, \(\hat{R}\), seed
-- `posterior_samples.npy` / `.csv` — combined posterior draws
+| File | Contents |
+| --- | --- |
+| `rotation_curve_fit.png` | Data, median model, 68% band, component curves |
+| `residuals.png` | Data − model vs radius |
+| `enclosed_mass.png` | Scaled \(M(<R)=v_c^2 R\) with posterior band |
+| `mcmc_traces.png` | Chain traces |
+| `posterior_corner.png` | Pairwise posteriors |
+| `posterior_summary.txt` / `.json` | Medians, intervals, \(\hat{R}\), seed, reproducibility command |
+| `posterior_samples.npy` / `.csv` | Combined posterior draws |
+
+Full CLI and API notes: [docs/usage.md](docs/usage.md).
 
 ---
 
-## Example results (included dataset)
+## Example results
 
-On `data/RadialVelocities.dat` (300 points, \(R\sim0.3\)–\(300\,\mathrm{kpc}\)):
+Dataset: `data/RadialVelocities.dat` (300 points, \(R \sim 0.3\)–\(300\,\mathrm{kpc}\)).
 
-- **Disk and halo masses are well constrained**; the bulge mass is consistent with near-zero — the dataset does not require a significant central bulge.
-- Typical RMSE of the median model is \(\sim 2\,\mathrm{km\,s^{-1}}\).
-- Multiple independent chains yield Gelman–Rubin \(\hat{R}\approx 1\) for \(\log M_d\) and \(\log M_h\).
+Run: `--fit-ah --fit-sigma` (4 chains × 20k steps).
 
-That decomposition is the scientific punchline: baryons (disk) set the inner curve; the extended halo sustains the outer velocities.
+| Parameter | Median | 16%–84% |
+| --- | ---: | ---: |
+| \(M_b\) | \(\sim 0\) | weakly constrained |
+| \(M_d\) | \(1.44\times 10^4\) | \(1.31\)–\(1.57\times 10^4\) |
+| \(M_h\) | \(2.63\times 10^4\) | \(2.49\)–\(2.77\times 10^4\) |
+| \(A_h\) [kpc] | \(64.0\) | \(57.4\)–\(71.9\) |
+| \(\sigma\) [km/s] | \(2.22\) | \(2.13\)–\(2.31\) |
 
----
+**Takeaway:** the disk shapes the inner curve; the halo sustains the outer velocities; this dataset does not require a significant bulge. \(\hat{R}\approx 1\) for well-constrained parameters.
 
-## Repository layout
-
-```
-data/                  Observed rotation curve
-src/galaxy_mcmc/       Installable Python package
-  model.py             Bulge + disk + halo potential
-  likelihood.py        Priors and Gaussian likelihood
-  mcmc.py              Adaptive Metropolis–Hastings + R-hat
-  plotting.py          Diagnostics and fit figures
-  io.py                Data loader
-scripts/run_inference.py   CLI entry point
-tests/                 Pytest suite
-docs/                  Theory and usage notes
-legacy/                Corrected original C homework pipeline
-results/               Generated figures and summaries
-```
+<p align="center">
+  <img src="docs/assets/posterior_corner.png" alt="Posterior corner plot" width="520"/>
+</p>
 
 ---
 
-## Algorithms & improvements over the original code
+## Project layout
 
-The original C Metropolis–Hastings sketch had several critical issues (integer division in exponents, likelihood evaluated on a single point, broken accept/reject branches, parameters forced into \([0,1]\), `pow(R,R)` instead of \(R^2\)). This rewrite fixes them and goes further:
+```
+data/                      Observed rotation curve
+src/galaxy_mcmc/           Installable Python package
+  model.py                 Bulge + disk + halo potential
+  likelihood.py            Priors + Gaussian likelihood
+  mcmc.py                  Adaptive MH + Gelman–Rubin
+  plotting.py              Fit / residual / mass / diagnostics figures
+  io.py                    Data loader
+scripts/run_inference.py   Main CLI
+scripts/mock_recovery.py   Synthetic recovery check
+tests/                     Pytest suite
+docs/                      Theory, usage, legacy notes + figures
+legacy/                    Corrected original C homework pipeline
+.github/workflows/         CI (pytest)
+results/                   Generated outputs (local)
+```
 
-1. **Correct circular-velocity formula** — components summed in quadrature.
-2. **Full \(\chi^2\) likelihood** over all radii.
-3. **Log-parameter sampling** — enforces positivity and improves mixing.
-4. **Adaptive proposal scales** targeting ~25% acceptance.
-5. **Multi-chain diagnostics** (Gelman–Rubin \(\hat{R}\)).
-6. **Optional free \(\sigma\)** for realistic noise inference.
-7. **Automated figures and JSON summaries**.
-8. **Regression tests** that lock the physics and a short MCMC recovery.
+---
 
-The cleaned C version in `legacy/` remains as a transparent, dependency-light reference:
+## What was fixed vs the original homework
+
+The early C Metropolis–Hastings sketch had real bugs (integer division in exponents, `pow(R,R)` instead of \(R^2\), single-point likelihood, broken accept/reject, masses trapped in \([0,1]\)). This rewrite:
+
+1. Uses the correct circular-velocity formula (quadrature sum)
+2. Evaluates a full-dataset Gaussian likelihood
+3. Samples in log-parameter space with adaptive proposals
+4. Adds multi-chain \(\hat{R}\), optional \(A_h\) / \(\sigma\), mock recovery, and CI
+
+The cleaned C code remains under [`legacy/`](docs/legacy.md) for teaching:
 
 ```bash
 cd legacy && make -f Tarea5.mk
@@ -152,7 +163,7 @@ cd legacy && make -f Tarea5.mk
 
 ---
 
-## Using the library in Python
+## Library snippet
 
 ```python
 from galaxy_mcmc import GalaxyPotential, load_rotation_curve
@@ -160,10 +171,12 @@ from galaxy_mcmc.likelihood import RotationCurvePosterior
 from galaxy_mcmc.mcmc import run_ensemble
 
 R, V = load_rotation_curve()
-posterior = RotationCurvePosterior(R, V, GalaxyPotential(), fit_sigma=True)
+posterior = RotationCurvePosterior(
+    R, V, GalaxyPotential(), fit_ah=True, fit_sigma=True
+)
 chains = run_ensemble(posterior, n_chains=4, n_steps=25_000, burn_in=5_000)
 
-samples = chains[0].samples  # shape (n_kept, n_params)
+samples = chains[0].samples   # burned-in physical parameters
 print(chains[0].summary())
 ```
 
@@ -171,19 +184,19 @@ print(chains[0].summary())
 
 ## Documentation
 
-- [Theory & model derivation](docs/theory.md)
-- [Usage & interpretation guide](docs/usage.md)
-- [Legacy C notes](docs/legacy.md)
+| Doc | Contents |
+| --- | --- |
+| [Theory](docs/theory.md) | Potentials, likelihood, priors, MCMC, historical bugs |
+| [Usage](docs/usage.md) | Install, CLI flags, interpreting outputs, own data, API |
+| [Legacy C](docs/legacy.md) | Build/run the educational C pipeline |
 
 ---
 
-## Citation / provenance
+## Provenance
 
-Originally developed as a computational-methods assignment on Monte Carlo methods and Bayesian parameter estimation for galactic rotation curves. Rebuilt as a reusable inference package with corrected models, diagnostics, and documentation.
+Developed as a Monte Carlo / Bayesian parameter-estimation assignment on galactic rotation curves by **Juan Prada**, then rebuilt as a reusable inference package with corrected models, diagnostics, and documentation.
 
-If you use this code in coursework or a portfolio, please keep attribution to the original author and link back to this repository.
-
----
+If you reuse this in coursework or a portfolio, please keep attribution and link back to the repository.
 
 ## License
 
