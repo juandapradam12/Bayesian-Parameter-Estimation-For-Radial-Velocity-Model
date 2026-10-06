@@ -18,6 +18,7 @@ from galaxy_mcmc.mcmc import run_ensemble
 from galaxy_mcmc.model import GalaxyPotential
 from galaxy_mcmc.plotting import (
     plot_corner,
+    plot_enclosed_mass,
     plot_residuals,
     plot_rotation_curve_fit,
     plot_traces,
@@ -123,9 +124,27 @@ def main() -> int:
     summary["n_steps"] = args.n_steps
     summary["burn_in"] = args.burn_in
     summary["n_chains"] = args.n_chains
+    summary["seed"] = args.seed
     summary["param_names"] = list(names)
+    summary["reproducibility"] = (
+        f"python scripts/run_inference.py --seed {args.seed} "
+        f"--n-steps {args.n_steps} --burn-in {args.burn_in} "
+        f"--n-chains {args.n_chains}"
+        + (" --fit-ah" if args.fit_ah else "")
+        + (" --fit-sigma" if args.fit_sigma else "")
+    )
     (args.outdir / "posterior_summary.json").write_text(json.dumps(summary, indent=2))
     np.save(args.outdir / "posterior_samples.npy", combined)
+
+    # Human-readable chain export
+    header = ",".join(names)
+    np.savetxt(
+        args.outdir / "posterior_samples.csv",
+        combined,
+        delimiter=",",
+        header=header,
+        comments="",
+    )
 
     plot_rotation_curve_fit(
         radius,
@@ -143,10 +162,18 @@ def main() -> int:
         args.outdir / "residuals.png",
         param_names=names,
     )
+    plot_enclosed_mass(
+        radius,
+        combined,
+        potential,
+        args.outdir / "enclosed_mass.png",
+        param_names=names,
+    )
     plot_traces(results, args.outdir / "mcmc_traces.png")
     plot_corner(combined, names, args.outdir / "posterior_corner.png")
 
     print(f"\nWrote figures and summaries to {args.outdir}/")
+    print(f"Reproducibility: {summary['reproducibility']}")
     return 0
 
 

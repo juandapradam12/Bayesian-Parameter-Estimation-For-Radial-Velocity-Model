@@ -23,6 +23,6 @@ legacy-build:
 	$(MAKE) -C legacy -f Tarea5.mk CurvaRotacion.x
 
 clean:
-	rm -rf results/*.png results/*.json results/*.txt results/*.npy
+	rm -rf results/*.png results/*.json results/*.txt results/*.npy results/*.csv
 	rm -rf legacy/*.dat legacy/*.x legacy/*.png legacy/*.log legacy/*.aux
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true

@@ -12,6 +12,7 @@ results/*.png
 results/*.json
 results/*.txt
 results/*.npy
+results/*.csv
 
 # Legacy build products
 legacy/*.x

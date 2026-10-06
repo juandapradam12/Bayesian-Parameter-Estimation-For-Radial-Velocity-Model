@@ -92,10 +92,11 @@ Outputs land in `results/`:
 
 - `rotation_curve_fit.png` — data, median model, 68% band, component curves
 - `residuals.png` — data − model versus radius
+- `enclosed_mass.png` — posterior band for scaled \(M(<R)=v_c^2 R\)
 - `mcmc_traces.png` — chain traces
 - `posterior_corner.png` — pairwise posteriors
-- `posterior_summary.txt` / `.json` — medians, credible intervals, \(\hat{R}\)
-- `posterior_samples.npy` — combined posterior draws
+- `posterior_summary.txt` / `.json` — medians, credible intervals, \(\hat{R}\), seed
+- `posterior_samples.npy` / `.csv` — combined posterior draws
 
 ---
 

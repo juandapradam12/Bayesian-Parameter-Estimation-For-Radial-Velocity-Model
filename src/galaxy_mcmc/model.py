@@ -109,3 +109,16 @@ class GalaxyPotential:
         """Evaluate ``vc`` from a parameter vector ``[Mb, Md, Mh]``."""
         Mb, Md, Mh = theta
         return self.circular_velocity(radius, Mb, Md, Mh, Ah=Ah)
+
+    def enclosed_mass(
+        self,
+        radius: np.ndarray,
+        Mb: float,
+        Md: float,
+        Mh: float,
+        Ah: float | None = None,
+    ) -> np.ndarray:
+        """Scaled enclosed mass ``M(<R) = v_c²(R) · R`` (G absorbed)."""
+        r = np.asarray(radius, dtype=float)
+        vc = self.circular_velocity(r, Mb, Md, Mh, Ah=Ah)
+        return vc * vc * r

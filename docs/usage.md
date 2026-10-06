@@ -47,6 +47,8 @@ Synthesizes a rotation curve from known \((M_b,M_d,M_h,A_h)\) and checks that th
 2. Check `mcmc_traces.png` for burn-in and mixing.
 3. Use `posterior_corner.png` to spot degeneracies.
 4. `rotation_curve_fit.png` is the science figure: data, median model, 68% band, and component contributions.
+5. `enclosed_mass.png` shows the scaled enclosed-mass profile \(M(<R)=v_c^2 R\).
+6. `posterior_summary.json` records the `--seed` and a copy-paste reproducibility command; samples are also written as `posterior_samples.csv`.
 
 ### Loading posterior samples
 

@@ -51,6 +51,16 @@ def test_ah_changes_halo_contribution():
     assert v_small != v_large
 
 
+def test_enclosed_mass_matches_vc_squared_times_r():
+    pot = GalaxyPotential()
+    r = np.array([10.0, 50.0, 100.0])
+    Mb, Md, Mh = 10.0, 1.4e4, 2.6e4
+    vc = pot.circular_velocity(r, Mb, Md, Mh)
+    menc = pot.enclosed_mass(r, Mb, Md, Mh)
+    np.testing.assert_allclose(menc, vc**2 * r)
+    assert np.all(np.diff(menc) > 0)
+
+
 def test_log_posterior_finite_at_reasonable_point():
     r, v = load_rotation_curve()
     post = RotationCurvePosterior(r, v, GalaxyPotential(), sigma=2.2)

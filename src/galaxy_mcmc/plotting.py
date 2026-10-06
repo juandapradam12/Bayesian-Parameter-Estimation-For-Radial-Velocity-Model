@@ -99,6 +99,44 @@ def plot_residuals(
     return outfile
 
 
+def plot_enclosed_mass(
+    radius: np.ndarray,
+    samples: np.ndarray,
+    potential: GalaxyPotential,
+    outfile: str | Path,
+    param_names: tuple[str, ...] = ("Mb", "Md", "Mh"),
+    n_posterior_draws: int = 200,
+    seed: int = 0,
+) -> Path:
+    """Posterior band for scaled enclosed mass ``M(<R) = v_c² R``."""
+    outfile = Path(outfile)
+    outfile.parent.mkdir(parents=True, exist_ok=True)
+
+    rng = np.random.default_rng(seed)
+    r_grid = np.linspace(max(radius.min(), 0.5), radius.max(), 400)
+    idx = rng.choice(len(samples), size=min(n_posterior_draws, len(samples)), replace=False)
+    curves = []
+    for i in idx:
+        masses, ah = _decode_sample(samples[i], param_names, potential)
+        curves.append(potential.enclosed_mass(r_grid, *masses, Ah=ah))
+    curves = np.asarray(curves)
+    lo, med, hi = np.percentile(curves, [16, 50, 84], axis=0)
+
+    fig, ax = plt.subplots(figsize=(8.5, 4.5))
+    ax.fill_between(r_grid, lo, hi, color="#54A24B", alpha=0.25, label="68% posterior band")
+    ax.plot(r_grid, med, color="#54A24B", lw=2.2, label="Median $M(<R)$")
+    ax.set_xlabel("Galactocentric radius $R$ [kpc]")
+    ax.set_ylabel(r"Scaled enclosed mass $M(<R)=v_c^2 R$")
+    ax.set_title("Enclosed mass profile")
+    ax.legend(frameon=False, loc="upper left")
+    ax.set_xlim(0, radius.max())
+    ax.set_ylim(bottom=0)
+    fig.tight_layout()
+    fig.savefig(outfile, dpi=160)
+    plt.close(fig)
+    return outfile
+
+
 def plot_traces(
     results: list[MCMCResult],
     outfile: str | Path,
